@@ -1,7 +1,7 @@
 import {DEFAULT_SETTINGS, MoonPublisherSettings} from "./settings";
 import "./styles.css";
 import {Editor, MarkdownView, Notice, Plugin, TFile} from "obsidian";
-import {createPublishFile, publish, unpublish} from "./publisher";
+import {createPublishFile, Publisher, PublishFile} from "./publisher";
 import {MetaContent} from "./metacontent";
 
 export default class MoonPublisherPlugin extends Plugin {
@@ -30,8 +30,8 @@ export default class MoonPublisherPlugin extends Plugin {
         } else { return null; }
     }
     
-    async removeId(f:TFile | null) {
-        const file = f ? f : this.app.workspace.getActiveFile();
+    async removeId() {
+        const file = this.app.workspace.getActiveFile();
         if (file != null) {
             const text = await this.app.vault.read(file);
             const mc = MetaContent.fromText(text).withoutId();
@@ -40,14 +40,26 @@ export default class MoonPublisherPlugin extends Plugin {
         }
     }
     
-    async applyId(f:TFile | null, i:string) {
-        const file = f ? f : this.app.workspace.getActiveFile();
+    async applyId(i:string) {
+        const file = this.app.workspace.getActiveFile();
         if (file != null) {
             const text = await this.app.vault.read(file);
             const mc = MetaContent.fromText(text).withoutId().withId(i);
             const newText = MetaContent.toText(mc);
             await this.app.vault.modify(file, newText);
         }
+    }
+    
+    async publish(file:PublishFile) {
+        const publisher = new Publisher(this.settings);
+        const newId = await publisher.publish(file)
+        await this.applyId(newId)
+    }
+    
+    async unpublish(file:PublishFile) {
+        const publisher = new Publisher(this.settings);
+        await publisher.unpublish(file)
+        await this.removeId()
     }
     
     async onload() {
@@ -59,8 +71,7 @@ export default class MoonPublisherPlugin extends Plugin {
             callback: async () => {
                 const file = await this.tryCreatePublishFile()
                 if (file != null) {
-                    const newId = await publish(file)
-                    await this.applyId(null,newId)
+                    await this.publish(file);
                 }
             }
         });
@@ -71,8 +82,7 @@ export default class MoonPublisherPlugin extends Plugin {
             callback: async () => {
                 const file = await this.tryCreatePublishFile()
                 if (file != null) {
-                    await unpublish(file)
-                    await this.removeId(null)
+                    await this.unpublish(file)
                 }
             }
         });
@@ -83,8 +93,7 @@ export default class MoonPublisherPlugin extends Plugin {
                 item.setIcon("upload-cloud");
                 item.onClick(async () => {
                     const f = await this.createPublishFile(file)
-                    const newId = await publish(f)
-                    await this.applyId(file,newId)
+                    await this.publish(f);
                 })
             })
             
@@ -93,8 +102,7 @@ export default class MoonPublisherPlugin extends Plugin {
                 item.setIcon("cloud-off");
                 item.onClick(async () => {
                     const f = await this.createPublishFile(file);
-                    await unpublish(f)
-                    await this.removeId(file)
+                    await this.unpublish(f)
                 });
             });
         }));

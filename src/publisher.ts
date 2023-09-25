@@ -1,5 +1,6 @@
 ﻿import {Notice} from "obsidian";
 import {MetaContent} from "./metacontent";
+import {MoonPublisherSettings} from "./settings";
 
 export interface FileAttachment {
     filename: string;
@@ -26,11 +27,24 @@ export function createPublishFile(name: string, path: string, metaContent: MetaC
     }
 }
 
-export async function publish(file: PublishFile) : Promise<string> {
-    new Notice("Publishing file");
-    return "abc123456"
+export class Publisher {
+    settings: MoonPublisherSettings;
+    
+    constructor(settings: MoonPublisherSettings) {
+        this.settings = settings;
+    }
+    
+    async publish(file: PublishFile) : Promise<string> {
+        
+        
+        
+        
+        new Notice("Publishing file");
+        return "abc123456"
+    }
+    
+    async unpublish(file: PublishFile) : Promise<void> {
+        new Notice("Publishing file");
+    }
 }
 
-export async function unpublish(file: PublishFile) : Promise<void> {
-    new Notice("Publishing file");
-}
