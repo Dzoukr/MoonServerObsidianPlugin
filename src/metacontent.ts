@@ -1,13 +1,13 @@
-﻿import { parse } from 'yaml'
+﻿import { parse, stringify } from 'yaml'
 
 const RAW_PROPERTIES_TAG = "---";
 
 module Parser {
-    function parseRawProperties(value:string) : string {     
-        var enabled = true;
-        var isReading = false;
-        var content = "";
-        
+    function parseRawProperties(value:string) : string {
+        let enabled = true;
+        let isReading = false;
+        let content : string [] = [];
+
         value.split("\n").forEach((line) => { 
             if (enabled && !isReading && line.startsWith(RAW_PROPERTIES_TAG)) {
                 isReading = true;
@@ -21,11 +21,39 @@ module Parser {
             }
             
             if (isReading) {
-                content += line + "\n";
+                content.push(line);
                 return;
             }
         });
-        return content;
+        return content.join("\n") + "\n"; //for some reason it's needed here
+    }
+
+    function parseWithoutProperties(value:string) : string {
+        let found = 0;
+        let isReading = false;
+        let content: string [] = [];
+        const lines = value.split("\n");
+        lines.forEach((line) => {
+            if (!isReading && line.startsWith(RAW_PROPERTIES_TAG)) {
+                found++;
+                if (found == 2) {
+                    isReading = true;
+                    return;
+                }
+                return;
+            }
+
+            if (isReading) {
+                content.push(line);
+                return;
+            }
+        });
+
+        if (isReading) {
+            return content.join("\n");
+        } else {
+            return value;
+        }
     }
     
     export function parseMetadata(value:string) : Map<string,any> {
@@ -38,10 +66,7 @@ module Parser {
     }
     
     export function parseContent(value:string) : string {
-        const raw = parseRawProperties(value);
-        return value
-            .replace(raw, "")
-            .replace(RAW_PROPERTIES_TAG+"\n"+RAW_PROPERTIES_TAG+"\n", "");
+        return parseWithoutProperties(value);
     }
 }
 
@@ -49,7 +74,7 @@ export class MetaContent {
     readonly metadata : Map<string,any>
     readonly content : string
     
-    constructor(metadata:Map<string,any>, content:string) {
+    private constructor(metadata:Map<string,any>, content:string) {
         this.metadata = metadata;
         this.content = content;
     }
@@ -81,12 +106,11 @@ export class MetaContent {
     
     static toText(metaPage:MetaContent) : string {
         let metadataText = "";
-        metadataText += RAW_PROPERTIES_TAG + "\n";
-        metaPage.metadata.forEach((value, key) => {
-            metadataText += key + ": " + value + "\n";
-        });
-        metadataText += RAW_PROPERTIES_TAG + "\n";
-        
+        if (metaPage.metadata.size > 0) {
+            metadataText += RAW_PROPERTIES_TAG + "\n";
+            metadataText += stringify(metaPage.metadata)
+            metadataText += RAW_PROPERTIES_TAG + "\n";
+        }
         return metadataText + metaPage.content;
     }
 }

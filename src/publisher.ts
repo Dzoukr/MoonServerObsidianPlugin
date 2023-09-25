@@ -28,11 +28,9 @@ export function createPublishFile(name: string, path: string, metaContent: MetaC
 
 export async function publish(file: PublishFile) : Promise<string> {
     new Notice("Publishing file");
-    console.log(file);
     return "abc123456"
 }
 
 export async function unpublish(file: PublishFile) : Promise<void> {
     new Notice("Publishing file");
-    console.log(file);
 }
