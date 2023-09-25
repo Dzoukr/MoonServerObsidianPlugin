@@ -1,0 +1,10 @@
+{
+	"id": "moon-publisher-plugin",
+	"name": "Moon Publisher",
+	"description": "Todo",
+	"author": "Roman",
+	"authorUrl": "https://github.com/Dzoukr",
+	"version": "1.0.0",
+	"minAppVersion": "0.15.0",
+	"isDesktopOnly": false
+}
