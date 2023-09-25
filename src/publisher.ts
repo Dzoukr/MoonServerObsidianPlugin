@@ -1,4 +1,5 @@
 ﻿import {Notice} from "obsidian";
+import {MetaContent} from "./metacontent";
 
 export interface FileAttachment {
     filename: string;
@@ -9,31 +10,26 @@ export interface PublishFile {
     id: string | null;
     name: string;
     path: string;
-    metadata : Map<string,any>
-    content: string;
-    attachments: FileAttachment[];
+    metaContent: MetaContent
+    attachments: FileAttachment[] // not used right now
 }
 
-export function createPublishFile(name: string, path: string, content: string, attachments: FileAttachment[], metadata:Map<string,any>) : PublishFile {
-    const idOrNull : string | null = metadata.get("id");
-    
-    if (idOrNull != null) {
-        metadata.delete("id");
-    }
+export function createPublishFile(name: string, path: string, metaContent: MetaContent, attachments: FileAttachment[]) : PublishFile {
+    const idOrNull : string | null = metaContent.metadata.get("id");
     
     return {
         id: idOrNull,
         name: name,
         path: path,
-        metadata: metadata,
-        content: content,
+        metaContent: metaContent,
         attachments: attachments
     }
 }
 
-export async function publish(file: PublishFile) : Promise<void> {
+export async function publish(file: PublishFile) : Promise<string> {
     new Notice("Publishing file");
     console.log(file);
+    return "abc123456"
 }
 
 export async function unpublish(file: PublishFile) : Promise<void> {

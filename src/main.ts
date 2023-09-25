@@ -1,8 +1,8 @@
 import {DEFAULT_SETTINGS, MoonPublisherSettings} from "./settings";
 import "./styles.css";
 import {Editor, MarkdownView, Notice, Plugin, TFile} from "obsidian";
-import {Parser} from "./parser";
 import {createPublishFile, publish, unpublish} from "./publisher";
+import {MetaContent} from "./metacontent";
 
 export default class MoonPublisherPlugin extends Plugin {
     settings: MoonPublisherSettings;
@@ -19,9 +19,8 @@ export default class MoonPublisherPlugin extends Plugin {
     
     async createPublishFile(file:TFile) {
         const text = await this.app.vault.cachedRead(file);
-        const value = Parser.parseContent(text);
-        const metadata = Parser.parseMetadata(text);
-        return createPublishFile(file.name, file.path, value, [], metadata);
+        const mc = MetaContent.fromText(text);
+        return createPublishFile(file.name, file.path, mc, []);
     }
     
     async tryCreatePublishFile() {
@@ -29,6 +28,26 @@ export default class MoonPublisherPlugin extends Plugin {
         if (file != null) {
             return await this.createPublishFile(file);
         } else { return null; }
+    }
+    
+    async removeId() {
+        const file = this.app.workspace.getActiveFile();
+        if (file != null) {
+            const text = await this.app.vault.cachedRead(file);
+            const mc = MetaContent.fromText(text).withoutId();
+            const newText = MetaContent.toText(mc);
+            await this.app.vault.modify(file, newText);
+        }
+    }
+    
+    async applyId(i:string) {
+        const file = this.app.workspace.getActiveFile();
+        if (file != null) {
+            const text = await this.app.vault.cachedRead(file);
+            const mc = MetaContent.fromText(text).withoutId().withId(i);
+            const newText = MetaContent.toText(mc);
+            await this.app.vault.modify(file, newText);
+        }
     }
     
     async onload() {
@@ -40,7 +59,8 @@ export default class MoonPublisherPlugin extends Plugin {
             callback: async () => {
                 const file = await this.tryCreatePublishFile()
                 if (file != null) {
-                    await publish(file);
+                    const newId = await publish(file)
+                    await this.applyId(newId)
                 }
             }
         });
@@ -51,7 +71,8 @@ export default class MoonPublisherPlugin extends Plugin {
             callback: async () => {
                 const file = await this.tryCreatePublishFile()
                 if (file != null) {
-                    await unpublish(file);
+                    await unpublish(file)
+                    await this.removeId()
                 }
             }
         });
@@ -61,23 +82,24 @@ export default class MoonPublisherPlugin extends Plugin {
                 item.setTitle(this.PUBLISH_COMMAND_TITLE);
                 item.setIcon("upload-cloud");
                 item.onClick(async () => {
-                    const f = await this.createPublishFile(file);
-                    await publish(f);
-                });
-            });
+                    const f = await this.createPublishFile(file)
+                    const newId = await publish(f)
+                    await this.applyId(newId)
+                })
+            })
             
             menu.addItem((item) => {
                 item.setTitle(this.UNPUBLISH_COMMAND_TITLE);
                 item.setIcon("cloud-off");
                 item.onClick(async () => {
                     const f = await this.createPublishFile(file);
-                    await unpublish(f);
+                    await unpublish(f)
+                    await this.removeId()
                 });
             });
         }));
     }
 
     onunload() {
-        console.log("unloading plugin");
     }
 }
