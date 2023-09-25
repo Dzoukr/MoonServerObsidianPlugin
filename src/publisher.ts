@@ -59,15 +59,23 @@ export class Publisher {
             content : file.metaContent.content,
             attachments : this.toAttachments(file.attachments)
         }
-        const { data, status } = await axios.post<string>(this.settings.mySetting, payload);
+        new Notice("Publishing file...");
+        const { data, status } = await axios.post<{ id : string }>(this.settings.baseUrl, payload);
+        
+        if(status >= 200 && status <= 299) {
+            new Notice("File successfully published");
+        }
         
         
-        new Notice("Publishing file" + status);
         return "abc123456"
     }
     
     async unpublish(file: PublishFile) : Promise<void> {
-        new Notice("Publishing file");
+        if (file.id == null) {
+            new Notice("File doesn't have an ID in metadata so it's considered already unpublished.");
+            return;
+        }
+        
     }
 }
 

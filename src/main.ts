@@ -1,4 +1,4 @@
-import {DEFAULT_SETTINGS, MoonPublisherSettings} from "./settings";
+import {DEFAULT_SETTINGS, MoonPublisherSettings, MoonPublisherSettingsTab} from "./settings";
 import "./styles.css";
 import {Editor, MarkdownView, Notice, Plugin, TFile} from "obsidian";
 import {createPublishFile, Publisher, PublishFile} from "./publisher";
@@ -106,6 +106,8 @@ export default class MoonPublisherPlugin extends Plugin {
                 });
             });
         }));
+
+        this.addSettingTab(new MoonPublisherSettingsTab(this.app, this));
     }
 
     onunload() {
