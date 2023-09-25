@@ -1,6 +1,7 @@
 ﻿import {Notice} from "obsidian";
 import {MetaContent} from "./metacontent";
 import {MoonPublisherSettings} from "./settings";
+import axios, {Axios} from "axios";
 
 export interface FileAttachment {
     filename: string;
@@ -34,12 +35,34 @@ export class Publisher {
         this.settings = settings;
     }
     
+    private toKeyValues(map:Map<string,any>) : { key : string, value : any }[] {
+        const pairs : { key : string, value : any }[] = [];
+        map.forEach((value, key) => {
+            pairs.push({ key: key, value: value })
+        });
+        return pairs;
+    }
+    
+    private toAttachments(att:FileAttachment[]) : { filename : string, payload : string }[] {
+        const pairs : { filename : string, payload : string }[] = [];
+        att.forEach((value) => {
+            pairs.push({ filename: value.filename, payload: value.payload })
+        });
+        return pairs;
+    }
+    
     async publish(file: PublishFile) : Promise<string> {
+        const payload = {
+            name : file.name,
+            path : file.path,
+            metadata : this.toKeyValues(file.metaContent.metadata),
+            content : file.metaContent.content,
+            attachments : this.toAttachments(file.attachments)
+        }
+        const { data, status } = await axios.post<string>(this.settings.mySetting, payload);
         
         
-        
-        
-        new Notice("Publishing file");
+        new Notice("Publishing file" + status);
         return "abc123456"
     }
     
