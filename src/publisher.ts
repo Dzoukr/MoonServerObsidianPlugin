@@ -71,8 +71,21 @@ export class Publisher {
         }
     }
     
+    private getUrl(i?:string) {
+        const url = this.settings.baseUrl;
+        if (url == "") {
+            new Notice("Please configure the plugin first.");
+            return null;
+        }
+        if (url.endsWith("/")) {
+            return url + i;
+        } else {
+            return url + "/" + i;
+        }
+    }
+    
     async publish(file: PublishFile) : Promise<string | null> {
-        const success = "File successfully published";
+        const success = "File successfully published.";
         const failure = "An error occurred while publishing the file. Please check your plugin configuration.";
         
         const payload = {
@@ -83,42 +96,43 @@ export class Publisher {
             attachments : this.toAttachments(file.attachments)
         }
         
-        new Notice("Publishing file...");
+        const url = this.getUrl();
         
-        try {
-            const { data, status } = await axios.post<{ id : string }>(this.settings.baseUrl, payload, this.getHeaders());
-            return this.resultWithNotification(success, failure, data.id, null, status);
+        if (url != null) {
+            try {
+                new Notice("Publishing file...");
+                const { data, status } = await axios.post<{ id : string }>(url, payload, this.getHeaders());
+                return this.resultWithNotification(success, failure, data.id, null, status);
+            }
+            catch (e) {
+                return this.resultWithNotification(success, failure, null, null);
+            }
         }
-        catch (e) {
-            return this.resultWithNotification(success, failure, null, null);
-        }
-    }
-    
-    private urlWithId (i:string): string {
-        if (this.settings.baseUrl.endsWith("/")) {
-            return this.settings.baseUrl + i;
-        } else {
-            return this.settings.baseUrl + "/" + i;
-        }
+        return null;
     }
     
     async unpublish(file: PublishFile) : Promise<boolean> {
-        const success = "File successfully unpublished";
+        const success = "File successfully unpublished.";
         const failure = "An error occurred while unpublishing the file. Please check your plugin configuration.";
         
         if (file.id == null) {
             new Notice("File doesn't have an ID in metadata so it's considered already unpublished.");
             return false;
         }
-        new Notice("Unpublishing file...");
         
-        try {
-            const { status } = await axios.post<{ id : string }>(this.urlWithId(file.id), {}, this.getHeaders());
-            return this.resultWithNotification(success, failure, true, false, status);
+        const url = this.getUrl(file.id);
+        
+        if (url != null) {
+            try {
+                new Notice("Unpublishing file...");
+                const { status } = await axios.post<{ id : string }>(url, {}, this.getHeaders());
+                return this.resultWithNotification(success, failure, true, false, status);
+            }
+            catch (e) {
+                return this.resultWithNotification(success, failure, true, false);
+            }
         }
-        catch (e) {
-            return this.resultWithNotification(success, failure, true, false);
-        }
+        return false;
     }
 }
 
