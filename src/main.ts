@@ -20,7 +20,7 @@ export default class MoonPublisherPlugin extends Plugin {
     async createPublishFile(file:TFile) {
         const text = await this.app.vault.read(file);
         const mc = MetaContent.fromText(text);
-        return createPublishFile(file.name, file.path, mc, []);
+        return createPublishFile(file.basename, file.path, mc, []);
     }
     
     async tryCreatePublishFile() {

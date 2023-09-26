@@ -4,7 +4,7 @@ import {defineConfig} from "vite";
 const setOutDir = (mode: string) => {
     switch (mode) {
         case "development":
-            return "./test-vault/.obsidian/plugins/moon-publisher-plugin";
+            return "./test-vault/.obsidian/plugins/moon-server-publisher";
         case "production":
             return "build";
     }

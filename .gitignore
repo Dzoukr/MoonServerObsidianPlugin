@@ -14,9 +14,9 @@ dist-ssr
 build
 
 test-vault/.obsidian/workspace.json
-test-vault/.obsidian/plugins/moon-publisher-plugin/*.css
-test-vault/.obsidian/plugins/moon-publisher-plugin/*.js
-test-vault/.obsidian/plugins/moon-publisher-plugin/*.json
+test-vault/.obsidian/plugins/moon-server-publisher/*.css
+test-vault/.obsidian/plugins/moon-server-publisher/*.js
+test-vault/.obsidian/plugins/moon-server-publisher/*.json
 
 # Editor directories and files
 .vscode/*

@@ -1,9 +1,9 @@
 {
-	"id": "moon-publisher-plugin",
-	"name": "Moon Publisher",
-	"description": "Todo",
+	"id": "moon-server-publisher",
+	"name": "Moon Server Publisher",
+	"description": "An Obsidian plugin for publishing notes to Moon Server instance.",
 	"author": "Roman",
-	"authorUrl": "https://github.com/Dzoukr",
+	"authorUrl": "https://github.com/Dzoukr/MoonServerObsidianPlugin",
 	"version": "1.0.0",
 	"minAppVersion": "0.15.0",
 	"isDesktopOnly": false

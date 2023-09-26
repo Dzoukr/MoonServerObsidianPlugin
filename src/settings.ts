@@ -13,6 +13,8 @@ export const DEFAULT_SETTINGS: MoonPublisherSettings = {
     apiSecret: ""
 };
 
+const html = (html: string) => createFragment((frag) => (frag.createDiv().innerHTML = html));
+
 export class MoonPublisherSettingsTab extends PluginSettingTab {
     plugin: MoonPublisherPlugin;
 
@@ -25,11 +27,15 @@ export class MoonPublisherSettingsTab extends PluginSettingTab {
         const {containerEl} = this;
 
         containerEl.empty();
-
+        
         new Setting(containerEl)
             .setHeading()
-            .setName("Moon Publisher Settings")
-            .setDesc("The Moon Publisher plugin requires a Moon Server instance to interact with. Enter the URL of your Moon Server instance below.")
+            .setName("Moon Server Publisher Settings")
+            .setDesc(html("The Moon Server Publisher plugin requires a Moon Server instance to interact with. " +
+                "Enter the URL of your Moon Server instance below.</br></br>" +
+                "See <a href='https://github.com/Dzoukr/MoonServerSpecification'>https://github.com/Dzoukr/MoonServerSpecification</a> " +
+                "for more information about the Moon Server specification."))
+        
         
         new Setting(containerEl)
             .setName("Moon Server URL")
