@@ -52,14 +52,18 @@ export default class MoonPublisherPlugin extends Plugin {
     
     async publish(file:PublishFile) {
         const publisher = new Publisher(this.settings);
-        const newId = await publisher.publish(file)
-        await this.applyId(newId)
+        const newId = await publisher.publish(file);
+        if (newId != null) {
+            await this.applyId(newId)
+        }
     }
     
     async unpublish(file:PublishFile) {
         const publisher = new Publisher(this.settings);
-        await publisher.unpublish(file)
-        await this.removeId()
+        const success = await publisher.unpublish(file)
+        if (success) {
+            await this.removeId()
+        }
     }
     
     async onload() {
