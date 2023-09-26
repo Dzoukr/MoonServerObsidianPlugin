@@ -3,10 +3,14 @@ import MoonPublisherPlugin from "./main";
 
 export interface MoonPublisherSettings {
     baseUrl: string;
+    apiKey: string;
+    apiSecret: string;
 }
 
 export const DEFAULT_SETTINGS: MoonPublisherSettings = {
     baseUrl: "",
+    apiKey: "",
+    apiSecret: ""
 };
 
 export class MoonPublisherSettingsTab extends PluginSettingTab {
@@ -35,6 +39,28 @@ export class MoonPublisherSettingsTab extends PluginSettingTab {
                 .setValue(this.plugin.settings.baseUrl)
                 .onChange(async (value) => {
                     this.plugin.settings.baseUrl = value;
+                    await this.plugin.saveSettings();
+                }));
+        
+        new Setting(containerEl)
+            .setName("API Key")
+            .setDesc("Optional API key to use when interacting with your Moon Server instance.")
+            .addText(text => text
+                .setPlaceholder('api-key')
+                .setValue(this.plugin.settings.apiKey)
+                .onChange(async (value) => {
+                    this.plugin.settings.apiKey = value;
+                    await this.plugin.saveSettings();
+                }));
+        
+        new Setting(containerEl)
+            .setName("API Secret")
+            .setDesc("Optional API secret to use when interacting with your Moon Server instance.")
+            .addText(text => text
+                .setPlaceholder('api-secret')
+                .setValue(this.plugin.settings.apiSecret)
+                .onChange(async (value) => {
+                    this.plugin.settings.apiSecret = value;
                     await this.plugin.saveSettings();
                 }));
         

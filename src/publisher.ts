@@ -51,6 +51,16 @@ export class Publisher {
         return pairs;
     }
     
+    private getHeaders() {
+        return { 
+            headers: {
+                "Content-Type": "application/json",
+                "api-key": this.settings.apiKey,
+                "api-secret": this.settings.apiSecret
+            }
+        }
+    }   
+    
     async publish(file: PublishFile) : Promise<string> {
         const payload = {
             name : file.name,
@@ -59,15 +69,25 @@ export class Publisher {
             content : file.metaContent.content,
             attachments : this.toAttachments(file.attachments)
         }
+        
         new Notice("Publishing file...");
-        const { data, status } = await axios.post<{ id : string }>(this.settings.baseUrl, payload);
+        const { data, status } = await axios.post<{ id : string }>(this.settings.baseUrl, payload, this.getHeaders());
         
         if(status >= 200 && status <= 299) {
             new Notice("File successfully published");
+            return data.id
+        } else {
+            new Notice("An error occurred while publishing the file");
+            return "";
         }
-        
-        
-        return "abc123456"
+    }
+    
+    private urlWithId (i:string): string {
+        if (this.settings.baseUrl.endsWith("/")) {
+            return this.settings.baseUrl + i;
+        } else {
+            return this.settings.baseUrl + "/" + i;
+        }
     }
     
     async unpublish(file: PublishFile) : Promise<void> {
@@ -75,7 +95,16 @@ export class Publisher {
             new Notice("File doesn't have an ID in metadata so it's considered already unpublished.");
             return;
         }
+        new Notice("Unpublishing file...");
         
+        const { data, status } = await axios.post<{ id : string }>(this.urlWithId(file.id), {}, this.getHeaders());
+
+        if(status >= 200 && status <= 299) {
+            new Notice("File successfully unpublished");
+        } else {
+            new Notice("An error occurred while unpublishing the file");
+        }
+        return;
     }
 }
 
