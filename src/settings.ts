@@ -50,7 +50,7 @@ export class MoonPublisherSettingsTab extends PluginSettingTab {
         
         new Setting(containerEl)
             .setName("API Key")
-            .setDesc("Optional API key to use when interacting with your Moon Server instance.")
+            .setDesc("API key to use when interacting with your Moon Server instance. (optional)")
             .addText(text => text
                 .setPlaceholder('api-key')
                 .setValue(this.plugin.settings.apiKey)
@@ -61,7 +61,7 @@ export class MoonPublisherSettingsTab extends PluginSettingTab {
         
         new Setting(containerEl)
             .setName("API Secret")
-            .setDesc("Optional API secret to use when interacting with your Moon Server instance.")
+            .setDesc("API secret to use when interacting with your Moon Server instance. (optional)")
             .addText(text => text
                 .setPlaceholder('api-secret')
                 .setValue(this.plugin.settings.apiSecret)
