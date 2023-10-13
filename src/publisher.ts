@@ -1,5 +1,5 @@
 ﻿import {Notice} from "obsidian";
-import {MetaContent} from "./metacontent";
+import {MetaContent, Metadata} from "./metacontent";
 import {MoonPublisherSettings} from "./settings";
 import axios, {Axios} from "axios";
 
@@ -33,14 +33,6 @@ export class Publisher {
     
     constructor(settings: MoonPublisherSettings) {
         this.settings = settings;
-    }
-    
-    private toKeyValues(map:Map<string,any>) : { key : string, value : any }[] {
-        const pairs : { key : string, value : any }[] = [];
-        map.forEach((value, key) => {
-            pairs.push({ key: key, value: value })
-        });
-        return pairs;
     }
     
     private toAttachments(att:FileAttachment[]) : { filename : string, payload : string }[] {
@@ -84,14 +76,14 @@ export class Publisher {
         }
     }
     
-    async publish(file: PublishFile) : Promise<string | null> {
+    async publish(file: PublishFile) : Promise<Metadata | null> {
         const success = "File successfully published.";
         const failure = "An error occurred while publishing the file. Please check your plugin configuration.";
         
         const payload = {
             name : file.name,
             path : file.path,
-            metadata : this.toKeyValues(file.metaContent.metadata),
+            metadata : Metadata.toObj(file.metaContent.metadata),
             content : file.metaContent.content,
             attachments : this.toAttachments(file.attachments)
         }
@@ -101,8 +93,9 @@ export class Publisher {
         if (url != null) {
             try {
                 new Notice("Publishing file...");
-                const { data, status } = await axios.post<{ id : string }>(url, payload, this.getHeaders());
-                return this.resultWithNotification(success, failure, data.id, null, status);
+                const { data, status } = await axios.post<any>(url, payload, this.getHeaders());
+                const responseMetadata = Metadata.fromObj(data);
+                return this.resultWithNotification(success, failure, responseMetadata, null, status);
             }
             catch (e) {
                 return this.resultWithNotification(success, failure, null, null);
@@ -111,13 +104,13 @@ export class Publisher {
         return null;
     }
     
-    async unpublish(file: PublishFile) : Promise<boolean> {
+    async unpublish(file: PublishFile) : Promise<Metadata | null> {
         const success = "File successfully unpublished.";
         const failure = "An error occurred while unpublishing the file. Please check your plugin configuration.";
         
         if (file.id == null) {
             new Notice("File doesn't have an ID in metadata so it's considered already unpublished.");
-            return false;
+            return null;
         }
         
         const url = this.getUrl(file.id);
@@ -125,14 +118,15 @@ export class Publisher {
         if (url != null) {
             try {
                 new Notice("Unpublishing file...");
-                const { status } = await axios.post<{ id : string }>(url, {}, this.getHeaders());
-                return this.resultWithNotification(success, failure, true, false, status);
+                const { data, status } = await axios.post<any>(url, {}, this.getHeaders());
+                const responseMetadata = Metadata.fromObj(data);
+                return this.resultWithNotification(success, failure, responseMetadata, null, status);
             }
             catch (e) {
-                return this.resultWithNotification(success, failure, true, false);
+                return this.resultWithNotification(success, failure, null, null);
             }
         }
-        return false;
+        return null;
     }
 }
 

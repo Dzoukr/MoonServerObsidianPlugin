@@ -56,7 +56,7 @@ module Parser {
         }
     }
     
-    export function parseMetadata(value:string) : Map<string,any> {
+    export function parseMetadata(value:string) : Metadata {
         const raw = parseRawProperties(value);
         let map = parse(raw, {mapAsMap: true});
         if (map == null) {
@@ -70,8 +70,37 @@ module Parser {
     }
 }
 
+export type Metadata = Map<string,any>;
+
+export module Metadata {
+    export function toObj(map:Metadata) : object {
+        const obj : any = {};
+        map.forEach((value, key) => {
+            obj[key] = value;
+        });
+        return obj;
+    }
+    export function fromObj(obj:any) : Metadata {
+        const map = new Map<string,any>();
+        Object.keys(obj).forEach((key) => {
+            map.set(key, obj[key]);
+        });
+        return map;
+    }
+    export function merge(m1:Metadata, m2:Metadata) : Metadata {
+        const merged = new Map<string,any>();
+        m1.forEach((value, key) => {
+            merged.set(key, value);
+        });
+        m2.forEach((value, key) => {
+            merged.set(key, value);
+        });
+        return merged;
+    }
+}
+
 export class MetaContent {
-    readonly metadata : Map<string,any>
+    readonly metadata : Metadata
     readonly content : string
     
     private constructor(metadata:Map<string,any>, content:string) {
@@ -79,22 +108,9 @@ export class MetaContent {
         this.content = content;
     }
     
-    withoutId() : MetaContent {
-        const newMetadata = new Map<string,any>();
-        this.metadata.forEach((value, key) => { 
-            if (key != "id") {
-                newMetadata.set(key, value);
-            }
-        });
-        return new MetaContent(newMetadata, this.content);
-    }
     
-    withId(i:string) : MetaContent {
-        const newMetadata = new Map<string,any>();
-        newMetadata.set("id", i);
-        this.metadata.forEach((value, key) => { 
-            newMetadata.set(key, value);
-        });
+    withMetadata(m:Metadata) : MetaContent {
+        const newMetadata = Metadata.merge(this.metadata, m);
         return new MetaContent(newMetadata, this.content);
     }
     

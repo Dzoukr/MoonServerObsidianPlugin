@@ -2,7 +2,7 @@ import {DEFAULT_SETTINGS, MoonPublisherSettings, MoonPublisherSettingsTab} from 
 import "./styles.css";
 import {Editor, MarkdownView, Notice, Plugin, TFile} from "obsidian";
 import {createPublishFile, Publisher, PublishFile} from "./publisher";
-import {MetaContent} from "./metacontent";
+import {MetaContent, Metadata} from "./metacontent";
 
 export default class MoonPublisherPlugin extends Plugin {
     settings: MoonPublisherSettings;
@@ -30,21 +30,11 @@ export default class MoonPublisherPlugin extends Plugin {
         } else { return null; }
     }
     
-    async removeId() {
+    async applyMetadata(m:Metadata) {
         const file = this.app.workspace.getActiveFile();
         if (file != null) {
             const text = await this.app.vault.read(file);
-            const mc = MetaContent.fromText(text).withoutId();
-            const newText = MetaContent.toText(mc);
-            await this.app.vault.modify(file, newText);
-        }
-    }
-    
-    async applyId(i:string) {
-        const file = this.app.workspace.getActiveFile();
-        if (file != null) {
-            const text = await this.app.vault.read(file);
-            const mc = MetaContent.fromText(text).withoutId().withId(i);
+            const mc = MetaContent.fromText(text).withMetadata(m)
             const newText = MetaContent.toText(mc);
             await this.app.vault.modify(file, newText);
         }
@@ -52,17 +42,17 @@ export default class MoonPublisherPlugin extends Plugin {
     
     async publish(file:PublishFile) {
         const publisher = new Publisher(this.settings);
-        const newId = await publisher.publish(file);
-        if (newId != null) {
-            await this.applyId(newId)
+        const metadata = await publisher.publish(file);
+        if (metadata != null) {
+            await this.applyMetadata(metadata)
         }
     }
     
     async unpublish(file:PublishFile) {
         const publisher = new Publisher(this.settings);
-        const success = await publisher.unpublish(file)
-        if (success) {
-            await this.removeId()
+        const metadata = await publisher.unpublish(file)
+        if (metadata != null) {
+            await this.applyMetadata(metadata)
         }
     }
     
