@@ -1,22 +1,18 @@
 ﻿import {Notice} from "obsidian";
-import {MetaContent, Metadata} from "./metacontent";
+import {Attachments, MetaContent, Metadata} from "./metacontent";
 import {MoonPublisherSettings} from "./settings";
 import axios, {Axios} from "axios";
 
-export interface FileAttachment {
-    filename: string;
-    payload: string;
-}
 
 export interface PublishFile {
     id: string | null;
     name: string;
     path: string;
     metaContent: MetaContent
-    attachments: FileAttachment[] // not used right now
+    attachments: Attachments
 }
 
-export function createPublishFile(name: string, path: string, metaContent: MetaContent, attachments: FileAttachment[]) : PublishFile {
+export function createPublishFile(name: string, path: string, metaContent: MetaContent, attachments: Map<string, string>) : PublishFile {
     const idOrNull : string | null = metaContent.metadata.get("id");
     
     return {
@@ -33,14 +29,6 @@ export class Publisher {
     
     constructor(settings: MoonPublisherSettings) {
         this.settings = settings;
-    }
-    
-    private toAttachments(att:FileAttachment[]) : { filename : string, payload : string }[] {
-        const pairs : { filename : string, payload : string }[] = [];
-        att.forEach((value) => {
-            pairs.push({ filename: value.filename, payload: value.payload })
-        });
-        return pairs;
     }
     
     private getHeaders() {
@@ -63,17 +51,25 @@ export class Publisher {
         }
     }
     
-    private getUrl(i?:string) {
+    private getCleanUrl() {
         const url = this.settings.baseUrl;
         if (url == "") {
             new Notice("Please configure the plugin first.");
             return null;
         }
-        if (url.endsWith("/")) {
-            return url + i;
-        } else {
-            return url + "/" + i;
-        }
+        return url.endsWith("/") ? url.substring(0, url.length - 1) : url; 
+    }
+    
+    private getPublishUrl() {
+        const url = this.getCleanUrl();
+        if (url == null) { return null; }
+        return url + "/publish";
+    }
+    
+    private getUnpublishUrl(i:string) {
+        const url = this.getCleanUrl();
+        if (url == null) { return null; }
+        return url + "/unpublish/" + i;
     }
     
     async publish(file: PublishFile) : Promise<Metadata | null> {
@@ -85,10 +81,10 @@ export class Publisher {
             path : file.path,
             metadata : Metadata.toObj(file.metaContent.metadata),
             content : file.metaContent.content,
-            attachments : this.toAttachments(file.attachments)
+            attachments : Attachments.toObj(file.attachments)
         }
         
-        const url = this.getUrl();
+        const url = this.getPublishUrl();
         
         if (url != null) {
             try {
@@ -113,12 +109,12 @@ export class Publisher {
             return null;
         }
         
-        const url = this.getUrl(file.id);
+        const url = this.getUnpublishUrl(file.id);
         
         if (url != null) {
             try {
                 new Notice("Unpublishing file...");
-                const { data, status } = await axios.post<any>(url, {}, this.getHeaders());
+                const { data, status } = await axios.post<any>(url, null, this.getHeaders());
                 const responseMetadata = Metadata.fromObj(data);
                 return this.resultWithNotification(success, failure, responseMetadata, null, status);
             }

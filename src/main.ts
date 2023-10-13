@@ -1,8 +1,9 @@
 import {DEFAULT_SETTINGS, MoonPublisherSettings, MoonPublisherSettingsTab} from "./settings";
 import "./styles.css";
-import {Editor, MarkdownView, Notice, Plugin, TFile} from "obsidian";
+import {Plugin, TFile } from "obsidian";
 import {createPublishFile, Publisher, PublishFile} from "./publisher";
-import {MetaContent, Metadata} from "./metacontent";
+import {Attachments, MetaContent, Metadata} from "./metacontent";
+
 
 export default class MoonPublisherPlugin extends Plugin {
     settings: MoonPublisherSettings;
@@ -17,10 +18,26 @@ export default class MoonPublisherPlugin extends Plugin {
         await this.saveData(this.settings);
     }
     
+    async getFilesAndPayloads(file:TFile) {
+        const map = new Map<string, ArrayBuffer>();
+        const fileCache = this.app.metadataCache.getFileCache(file)
+        if (file != null && fileCache != null && fileCache.embeds != null) {
+            for (const embed of fileCache.embeds) {
+                const emb = this.app.metadataCache.getFirstLinkpathDest(embed.link, file.path)
+                if (emb != null) {
+                    map.set(emb.name, await this.app.vault.readBinary(emb));
+                }
+            }
+        }
+        return map;
+    }
+    
     async createPublishFile(file:TFile) {
         const text = await this.app.vault.read(file);
         const mc = MetaContent.fromText(text);
-        return createPublishFile(file.basename, file.path, mc, []);
+        const attBuffer = await this.getFilesAndPayloads(file);
+        const att = Attachments.fromMap(attBuffer)
+        return createPublishFile(file.basename, file.path, mc, att);
     }
     
     async tryCreatePublishFile() {
@@ -39,6 +56,7 @@ export default class MoonPublisherPlugin extends Plugin {
             await this.app.vault.modify(file, newText);
         }
     }
+    
     
     async publish(file:PublishFile) {
         const publisher = new Publisher(this.settings);

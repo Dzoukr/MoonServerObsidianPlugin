@@ -88,14 +88,49 @@ export module Metadata {
         return map;
     }
     export function merge(m1:Metadata, m2:Metadata) : Metadata {
-        const merged = new Map<string,any>();
+        let merged = new Map<string,any>();
         m1.forEach((value, key) => {
             merged.set(key, value);
         });
         m2.forEach((value, key) => {
             merged.set(key, value);
         });
+        merged.forEach((value, key) => {
+            if (value == null) {
+                merged.delete(key);
+            }
+        });
         return merged;
+    }
+}
+
+export type Attachments = Map<string,string>;
+
+export module Attachments {
+
+    function arrayBufferToBase64(buffer: ArrayBuffer): string {
+        let binary = '';
+        const bytes = new Uint8Array(buffer);
+        const len = bytes.byteLength;
+        for (let i = 0; i < len; i++) {
+            binary += String.fromCharCode(bytes[i]);
+        }
+        return window.btoa(binary);
+    }
+    
+    export function toObj(map: Attachments): object {
+        const obj: any = {};
+        map.forEach((value, key) => {
+            obj[key] = value;
+        });
+        return obj;
+    }
+    export function fromMap(map: Map<string,ArrayBuffer>) : Attachments {
+        const att = new Map<string,string>();
+        map.forEach((value, key) => {
+            att.set(key, arrayBufferToBase64(value));
+        });
+        return att;
     }
 }
 
