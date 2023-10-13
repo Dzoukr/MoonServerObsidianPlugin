@@ -4,7 +4,7 @@ import {MoonPublisherSettings} from "./settings";
 import axios, {Axios} from "axios";
 
 
-export interface PublishFile {
+export type PublishFile = {
     id: string | null;
     name: string;
     path: string;

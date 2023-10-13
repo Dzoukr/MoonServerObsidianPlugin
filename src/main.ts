@@ -51,7 +51,7 @@ export default class MoonPublisherPlugin extends Plugin {
         const file = this.app.workspace.getActiveFile();
         if (file != null) {
             const text = await this.app.vault.read(file);
-            const mc = MetaContent.fromText(text).withMetadata(m)
+            const mc = MetaContent.withMetadata(MetaContent.fromText(text), m);
             const newText = MetaContent.toText(mc);
             await this.app.vault.modify(file, newText);
         }

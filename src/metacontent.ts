@@ -134,28 +134,25 @@ export module Attachments {
     }
 }
 
-export class MetaContent {
-    readonly metadata : Metadata
-    readonly content : string
+export type MetaContent = {
+    metadata : Metadata
+    content : string
+}
+
+export module MetaContent {
     
-    private constructor(metadata:Map<string,any>, content:string) {
-        this.metadata = metadata;
-        this.content = content;
+    export function withMetadata(mc:MetaContent, m:Metadata) : MetaContent {
+        const newMetadata = Metadata.merge(mc.metadata, m);
+        return { metadata: newMetadata, content: mc.content };
     }
     
-    
-    withMetadata(m:Metadata) : MetaContent {
-        const newMetadata = Metadata.merge(this.metadata, m);
-        return new MetaContent(newMetadata, this.content);
-    }
-    
-    static fromText(text:string) : MetaContent {
+    export function fromText(text:string) : MetaContent {
         const metadata = Parser.parseMetadata(text);
         const content = Parser.parseContent(text);
-        return new MetaContent(metadata, content);
+        return { metadata: metadata, content: content };
     }
     
-    static toText(metaPage:MetaContent) : string {
+    export function toText(metaPage:MetaContent) : string {
         let metadataText = "";
         if (metaPage.metadata.size > 0) {
             metadataText += RAW_PROPERTIES_TAG + "\n";
