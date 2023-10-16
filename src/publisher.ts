@@ -72,6 +72,21 @@ export class Publisher {
         return url + "/unpublish/" + i;
     }
     
+    private async processResult(url:string | null, payload: {} | null, loading:string, success:string, failure:string) {
+        if (url != null) {
+            try {
+                new Notice(loading);
+                const { data, status } = await axios.post<any>(url, payload, this.getHeaders());
+                const responseMetadata = Metadata.fromObj(data);
+                return this.resultWithNotification(success, failure, responseMetadata, null, status);
+            }
+            catch (e) {
+                return this.resultWithNotification(success, failure, null, null);
+            }
+        }
+        return null;
+    }
+    
     async publish(file: PublishFile) : Promise<Metadata | null> {
         const success = "File successfully published.";
         const failure = "An error occurred while publishing the file. Please check your plugin configuration.";
@@ -83,21 +98,8 @@ export class Publisher {
             content : file.metaContent.content,
             attachments : Attachments.toObj(file.attachments)
         }
-        
         const url = this.getPublishUrl();
-        
-        if (url != null) {
-            try {
-                new Notice("Publishing file...");
-                const { data, status } = await axios.post<any>(url, payload, this.getHeaders());
-                const responseMetadata = Metadata.fromObj(data);
-                return this.resultWithNotification(success, failure, responseMetadata, null, status);
-            }
-            catch (e) {
-                return this.resultWithNotification(success, failure, null, null);
-            }
-        }
-        return null;
+        return this.processResult(url, payload, "Publishing file...", success, failure);
     }
     
     async unpublish(file: PublishFile) : Promise<Metadata | null> {
@@ -110,19 +112,7 @@ export class Publisher {
         }
         
         const url = this.getUnpublishUrl(file.id);
-        
-        if (url != null) {
-            try {
-                new Notice("Unpublishing file...");
-                const { data, status } = await axios.post<any>(url, null, this.getHeaders());
-                const responseMetadata = Metadata.fromObj(data);
-                return this.resultWithNotification(success, failure, responseMetadata, null, status);
-            }
-            catch (e) {
-                return this.resultWithNotification(success, failure, null, null);
-            }
-        }
-        return null;
+        return this.processResult(url, null, "Unpublishing file...", success, failure);
     }
 }
 
