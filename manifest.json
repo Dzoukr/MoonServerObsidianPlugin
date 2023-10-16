@@ -2,7 +2,7 @@
 	"id": "moon-server-publisher",
 	"name": "Moon Server Publisher",
 	"description": "An Obsidian plugin for publishing notes to Moon Server instance.",
-	"author": "Roman",
+	"author": "Roman Provazník",
 	"authorUrl": "https://github.com/Dzoukr/MoonServerObsidianPlugin",
 	"version": "1.0.0",
 	"minAppVersion": "0.15.0",
