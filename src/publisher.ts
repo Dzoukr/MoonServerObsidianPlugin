@@ -60,10 +60,11 @@ export class Publisher {
         return url.endsWith("/") ? url.substring(0, url.length - 1) : url; 
     }
     
-    private getPublishUrl() {
+    private getPublishUrl(id:string | null) {
         const url = this.getCleanUrl();
         if (url == null) { return null; }
-        return url + "/publish";
+        const suffix = id == null ? "" : "/" + id;
+        return url + "/publish" + suffix;
     }
     
     private getUnpublishUrl(i:string) {
@@ -98,7 +99,7 @@ export class Publisher {
             content : file.metaContent.content,
             attachments : Attachments.toObj(file.attachments)
         }
-        const url = this.getPublishUrl();
+        const url = this.getPublishUrl(file.id);
         return this.processResult(url, payload, "Publishing file...", success, failure);
     }
     
