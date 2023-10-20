@@ -1,8 +1,6 @@
-﻿import {Notice} from "obsidian";
+﻿import {Notice, requestUrl, RequestUrlParam} from "obsidian";
 import {Attachments, MetaContent, Metadata} from "./metacontent";
 import {MoonPublisherSettings} from "./settings";
-import axios, {Axios} from "axios";
-
 
 export type PublishFile = {
     id: string | null;
@@ -33,11 +31,9 @@ export class Publisher {
     
     private getHeaders() {
         return { 
-            headers: {
-                "Content-Type": "application/json",
-                "api-key": this.settings.apiKey,
-                "api-secret": this.settings.apiSecret
-            }
+            "Content-Type": "application/json",
+            "api-key": this.settings.apiKey,
+            "api-secret": this.settings.apiSecret
         }
     }   
     
@@ -77,9 +73,11 @@ export class Publisher {
         if (url != null) {
             try {
                 new Notice(loading);
-                const { data, status } = await axios.post<any>(url, payload, this.getHeaders());
-                const responseMetadata = Metadata.fromObj(data);
-                return this.resultWithNotification(success, failure, responseMetadata, null, status);
+                const payloadString = payload == null ? "" : JSON.stringify(payload); 
+                const requestUrlParam : RequestUrlParam = { url: url, body: payloadString, method: "POST", headers: this.getHeaders() }
+                const response = await requestUrl(requestUrlParam)
+                const responseMetadata = Metadata.fromObj(response.json);
+                return this.resultWithNotification(success, failure, responseMetadata, null, response.status);
             }
             catch (e) {
                 return this.resultWithNotification(success, failure, null, null);
