@@ -82,7 +82,7 @@ export default class MoonPublisherPlugin extends Plugin {
         await this.loadSettings();
 
         this.addCommand({
-            id: 'publish-command',
+            id: 'publish',
             name: this.PUBLISH_COMMAND_TITLE,
             callback: async () => {
                 const file = await this.tryCreatePublishFile()
@@ -93,7 +93,7 @@ export default class MoonPublisherPlugin extends Plugin {
         });
         
         this.addCommand({
-            id: 'unpublish-command',
+            id: 'unpublish',
             name: this.UNPUBLISH_COMMAND_TITLE,
             callback: async () => {
                 const file = await this.tryCreatePublishFile()
