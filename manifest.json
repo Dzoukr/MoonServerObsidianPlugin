@@ -1,7 +1,7 @@
 {
 	"id": "moon-server-publisher",
-	"name": "Moon Server Publisher",
-	"description": "Publish your notes directly to Moon Server instance.",
+	"name": "Moon server publisher",
+	"description": "Publish your notes directly to Moon server instance.",
 	"author": "Roman Provazník",
 	"authorUrl": "https://github.com/Dzoukr",
 	"version": "1.0.0",

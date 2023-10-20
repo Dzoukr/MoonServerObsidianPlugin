@@ -22,7 +22,17 @@ export class MoonPublisherSettingsTab extends PluginSettingTab {
         super(app, plugin);
         this.plugin = plugin;
     }
-
+    
+    private getDescription () : DocumentFragment {
+        let desc = new DocumentFragment();
+        desc.createEl("div",{ text : "The Moon server publisher plugin requires a Moon server instance to interact with. "+
+            "Enter the URL of your Moon server instance below." });
+        desc.createEl("span",{ text : "See " });
+        desc.createEl("a",{ href : "https://github.com/Dzoukr/MoonServerSpecification", text : "https://github.com/Dzoukr/MoonServerSpecification" });
+        desc.createEl("span",{ text : " for more information about the Moon server specification." });
+        return desc;
+    }
+    
     display(): void {
         const {containerEl} = this;
 
@@ -30,16 +40,12 @@ export class MoonPublisherSettingsTab extends PluginSettingTab {
         
         new Setting(containerEl)
             .setHeading()
-            .setName("Moon Server Publisher Settings")
-            .setDesc(html("The Moon Server Publisher plugin requires a Moon Server instance to interact with. " +
-                "Enter the URL of your Moon Server instance below.</br></br>" +
-                "See <a href='https://github.com/Dzoukr/MoonServerSpecification'>https://github.com/Dzoukr/MoonServerSpecification</a> " +
-                "for more information about the Moon Server specification."))
-        
+            .setName("General Settings")
+            .setDesc(this.getDescription())
         
         new Setting(containerEl)
-            .setName("Moon Server URL")
-            .setDesc("Base URL of your Moon Server instance (e.g. https://moon.example.com)")
+            .setName("Moon server URL")
+            .setDesc("Base URL of your Moon server instance (e.g. https://moon.example.com)")
             .addText(text => text
                 .setPlaceholder('https://moon.example.com')
                 .setValue(this.plugin.settings.baseUrl)
@@ -49,8 +55,8 @@ export class MoonPublisherSettingsTab extends PluginSettingTab {
                 }));
         
         new Setting(containerEl)
-            .setName("API Key")
-            .setDesc("API key to use when interacting with your Moon Server instance. (optional)")
+            .setName("API key")
+            .setDesc("API key to use when interacting with your Moon server instance. (optional)")
             .addText(text => text
                 .setPlaceholder('api-key')
                 .setValue(this.plugin.settings.apiKey)
@@ -60,8 +66,8 @@ export class MoonPublisherSettingsTab extends PluginSettingTab {
                 }));
         
         new Setting(containerEl)
-            .setName("API Secret")
-            .setDesc("API secret to use when interacting with your Moon Server instance. (optional)")
+            .setName("API secret")
+            .setDesc("API secret to use when interacting with your Moon server instance. (optional)")
             .addText(text => text
                 .setPlaceholder('api-secret')
                 .setValue(this.plugin.settings.apiSecret)
