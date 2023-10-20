@@ -8,8 +8,8 @@ import {Attachments, MetaContent, Metadata} from "./metacontent";
 export default class MoonPublisherPlugin extends Plugin {
     settings: MoonPublisherSettings;
     
-    PUBLISH_COMMAND_TITLE = "Publish to Moon Server";
-    UNPUBLISH_COMMAND_TITLE = "Unpublish from Moon Server";
+    PUBLISH_COMMAND_TITLE = "Publish to Moon server";
+    UNPUBLISH_COMMAND_TITLE = "Unpublish from Moon server";
     
     async loadSettings() {
         this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
