@@ -50,13 +50,17 @@ export default class MoonPublisherPlugin extends Plugin {
     async applyMetadata(m:Metadata) {
         const file = this.app.workspace.getActiveFile();
         if (file != null) {
-            const text = await this.app.vault.read(file);
-            const mc = MetaContent.withMetadata(MetaContent.fromText(text), m);
-            const newText = MetaContent.toText(mc);
-            await this.app.vault.modify(file, newText);
+            await this.app.fileManager.processFrontMatter(file, (frontmatter) => {
+                for (const [key, value] of m.entries()) {
+                    if (value != null) {
+                        frontmatter[key] = value;
+                    } else {
+                        delete frontmatter[key];
+                    }
+                }
+            });
         }
     }
-    
     
     async publish(file:PublishFile) {
         const publisher = new Publisher(this.settings);
